@@ -3,6 +3,12 @@ VALID_SYMBOLS="S0+.=v|A¬&()"
 def check_valid_symbols(x, symbols):
     return all(c in x for c in symbols)
 
+def check_first_symbol(x):
+     return x[0] in "S0vA¬("
+
+def check_last_symbol(x):
+        return x[1] in "0v|)"
+
 def check_parenthesis(x):
     if "()" in x:
         return False
@@ -21,35 +27,45 @@ def check_parenthesis(x):
     
     return (cont == 0)
 
-def check_arithm(x):
+def check_consecutive_symbols(x):
     for i, y in enumerate(x):
-        if y in ("+", ".", "="):
-            if x[i-1] not in "0v|)" or x[i+1] not in "0v|(":
-                return False
-    
-    return True
-            
-def check_not(x):
-    for i, y in enumerate(x):
-        if y = "¬":
-            if x[i+1] != "A(":
-                return False
-    
-    return True
-
-def check_s(x):
-    for i, y in enumerate(x):
-        if y = "S":
+        if y == "S":
             if x[i+1] != "0":
                 return False
-    
-    return True
-
-def check_A(x):
-    for i, y in enumerate(x):
-        if y = "¬":
-            if x[i+1] != "A(":
+            
+        elif y == "0":
+            if x[i+1] not in ("+", ".", "=", ")"):
                 return False
+
+        elif y in ("+", ".", "="):
+            if x[i-1] not in "0v|)" or x[i+1] not in "0v(":
+                return False
+        
+        elif x in "v|":
+            if x[i+1] not in ("+", ".", "=", "|", ")"):
+                return False
+
+        elif y == "A":
+            if x[i+1] != "v":
+                return False
+
+        elif y == "¬":
+            if x[i+1] not in "A(":
+                return False
+            
+        elif y == "&":
+            if x[i-1] != ")" or x[i+1] != "(":
+                return False
+            
+        elif y == "(":
+            if x[i+1] not in "S0vA¬":
+                return False
+        
+        elif y == ")":
+            if x[i+1] not in "+.=&":
+                return False
+            
+    return True
                 
 
 def is_valid_expression(x, symbols):
@@ -58,17 +74,10 @@ def is_valid_expression(x, symbols):
     x = reduce_expression(x)  # this doesn't affect whether the original expression is valid or not.
 
     return all((check_valid_symbols(x, symbols),
+                check_first_symbol(x),
+                check_last_symbol(x),
                 check_parenthesis(x),
-                check_arithm(x),
-                check_not,
-                check_s))
-
-
-
-
-
-
-    
+                check_consecutive_symbols(x)))
 
 
 def reduce_expression(x):
@@ -89,15 +98,13 @@ def reduce_expression(x):
 
     return x
 
-def find_
-
 def is_term(x):
     for y in x:
         if y not in "S0+.v|()":
             return False
     
     return True
->
+
     # x = reduce_s(x)
 
     # if x in ("0", "v", "v|"):
@@ -120,13 +127,13 @@ def is_term(x):
 
 
 #################################################
+if __name__ == "__main__":
+    input_string = "()"
 
-input_string = "hjkhjk"
+    if not is_valid_expression(input_string, VALID_SYMBOLS):
+        print("Not expression")
 
-if not is_expression(input_string, VALID_SYMBOLS):
-    print("Expression")
-
-else:
-    print("Not an expression")
+    else:
+        print("Expression")
 
 
