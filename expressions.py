@@ -1,13 +1,20 @@
+# TODO: so far it breaks for input_string = "(v)". Is this an expression or not?
+# obs: chose to reject "empty expressions" such as "()". Is it ok?
+
 VALID_SYMBOLS="S0+.=v|A¬&()"
 
 def check_valid_symbols(x, symbols):
-    return all(c in x for c in symbols)
+    for c in x:
+        if c not in symbols:
+            return False, "symbol " + c
+        
+    return True, None
 
 def check_first_symbol(x):
      return x[0] in "S0vA¬("
 
 def check_last_symbol(x):
-        return x[1] in "0v|)"
+        return x[-1] in "0v|)"
 
 def check_parenthesis(x):
     if "()" in x:
@@ -38,7 +45,7 @@ def check_consecutive_symbols(x):
                 return False
 
         elif y in ("+", ".", "="):
-            if x[i-1] not in "0v|)" or x[i+1] not in "0v(":
+            if x[i+1] not in "0v(":
                 return False
         
         elif x in "v|":
@@ -54,7 +61,7 @@ def check_consecutive_symbols(x):
                 return False
             
         elif y == "&":
-            if x[i-1] != ")" or x[i+1] != "(":
+            if x[i+1] != "(":
                 return False
             
         elif y == "(":
@@ -66,19 +73,32 @@ def check_consecutive_symbols(x):
                 return False
             
     return True
-                
 
 def is_valid_expression(x, symbols):
-    #TODO: complete this function: not every string built with VALID_SYMBOLS is valid i.e. ")S0(" or "S&+".
+    valid, symbol = check_valid_symbols(x, symbols)
 
-    x = reduce_expression(x)  # this doesn't affect whether the original expression is valid or not.
+    if not valid:
+        return False, symbol
 
-    return all((check_valid_symbols(x, symbols),
-                check_first_symbol(x),
-                check_last_symbol(x),
-                check_parenthesis(x),
-                check_consecutive_symbols(x)))
+    try:
+        x = reduce_expression(x)  # this doesn't affect whether the original expression is valid or not.
+    
+    except IndexError:
+        return False, "empty"  #  expresión vacía, por ejemplo "()" las rechazo.
 
+    print("After reducing expression: " + x)
+
+    if not check_first_symbol(x):
+        return False, "first"
+    
+    if not check_last_symbol(x):
+        return False, "last"
+    
+    if not check_parenthesis(x):
+        return False, "parenthesis"
+    
+    if not check_consecutive_symbols(x):
+        return False, "consec"
 
 def reduce_expression(x):
     while x[0] == "(" and x[-1] == ")":  # (((E))) -> E
@@ -119,21 +139,14 @@ def is_term(x):
 
     #         return 
         
-    
-    
-    
-
-    
-
 
 #################################################
 if __name__ == "__main__":
-    input_string = "()"
+    input_string = "(v)"
 
-    if not is_valid_expression(input_string, VALID_SYMBOLS):
-        print("Not expression")
+    a, b = is_valid_expression(input_string, VALID_SYMBOLS)
 
-    else:
-        print("Expression")
+    print(a, b)
+
 
 
