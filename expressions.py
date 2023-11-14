@@ -3,6 +3,16 @@
 
 VALID_SYMBOLS="S0+.=v|A¬&()"
 
+VALID_CONSEC = (("S", "0"),
+                ("0", "+.=)"),
+                ("+.=", "0v("),
+                ("v|", "+.=|)"),
+                ("A", "v"),
+                ("¬", "A("),
+                ("&", "("),
+                ("(", "S0vA¬"),
+                (")", "+.=&"))
+
 def check_valid_symbols(x, symbols):
     for c in x:
         if c not in symbols:
@@ -36,57 +46,55 @@ def check_parenthesis(x):
 
 def check_consecutive_symbols(x):
     for i, y in enumerate(x):
-        if y == "S":
-            if x[i+1] != "0":
-                return False
+        for z in VALID_CONSEC:
+            if y in z[0] and x[i+1] not in z[1]:
+                return False, "consec: " + y + x[i+1]
             
-        elif y == "0":
-            if x[i+1] not in ("+", ".", "=", ")"):
-                return False
+        # elif y == "0" and x[i+1] not in ("+", ".", "=", ")"):
+        #     return False
 
-        elif y in ("+", ".", "="):
-            if x[i+1] not in "0v(":
-                return False
+        # elif y in ("+", ".", "=") and x[i+1] not in "0v(":
+        #     return False
         
-        elif x in "v|":
-            if x[i+1] not in ("+", ".", "=", "|", ")"):
-                return False
+        # elif y in "v|" and x[i+1] not in ("+", ".", "=", "|", ")"):
+        #     return False
 
-        elif y == "A":
-            if x[i+1] != "v":
-                return False
+        # elif y == "A" and x[i+1] != "v":
+        #     return False
 
-        elif y == "¬":
-            if x[i+1] not in "A(":
-                return False
+        # elif y == "¬" and x[i+1] not in "A(":
+        #     return False
             
-        elif y == "&":
-            if x[i+1] != "(":
-                return False
+        # elif y == "&" and x[i+1] != "(":
+        #     return False
             
-        elif y == "(":
-            if x[i+1] not in "S0vA¬":
-                return False
+        # elif y == "(" and x[i+1] not in "S0vA¬":
+        #     return False
         
-        elif y == ")":
-            if x[i+1] not in "+.=&":
-                return False
+        # elif y == ")" and x[i+1] not in "+.=&":
+        #     return False
             
     return True
 
-def is_valid_expression(x, symbols):
+def check_has_equal(x):
+    return "=" in x
+
+def is_statement(x, symbols):
     valid, symbol = check_valid_symbols(x, symbols)
 
     if not valid:
         return False, symbol
 
     try:
-        x = reduce_expression(x)  # this doesn't affect whether the original expression is valid or not.
+        x = reduce_expression(x)  # this should not affect whether the original expression is a statement or not.
     
     except IndexError:
         return False, "empty"  #  expresión vacía, por ejemplo "()" las rechazo.
 
     print("After reducing expression: " + x)
+
+    if not check_has_equal(x):
+        return False, "equal"
 
     if not check_first_symbol(x):
         return False, "first"
@@ -97,8 +105,15 @@ def is_valid_expression(x, symbols):
     if not check_parenthesis(x):
         return False, "parenthesis"
     
-    if not check_consecutive_symbols(x):
-        return False, "consec"
+    valid, consec = check_consecutive_symbols(x)
+
+    if not valid:
+        return False, consec
+
+    # if not check_consecutive_symbols(x):
+    #     return False, "consec"
+    
+    return True, None
 
 def reduce_expression(x):
     while x[0] == "(" and x[-1] == ")":  # (((E))) -> E
@@ -142,9 +157,9 @@ def is_term(x):
 
 #################################################
 if __name__ == "__main__":
-    input_string = "(v)"
+    input_string = "(v=vv)"
 
-    a, b = is_valid_expression(input_string, VALID_SYMBOLS)
+    a, b = is_statement(input_string, VALID_SYMBOLS)
 
     print(a, b)
 
