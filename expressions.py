@@ -1,5 +1,5 @@
 # TODO: so far it breaks for input_string = "(v)". Is this an expression or not?
-# obs: chose to reject "empty expressions" such as "()". Is it ok?
+# obs: chose to reject "empty expressions" such as "()". Is it ok? 
 
 VALID_SYMBOLS="S0+.=v|A¬&()"
 
